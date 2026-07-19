@@ -1,9 +1,8 @@
-import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { candidates, cvs, jobs } from "@/lib/db/schema";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CandidateList } from "./candidate-list";
 
 export default async function CandidatesPage() {
   const rows = await db
@@ -36,26 +35,7 @@ export default async function CandidatesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex flex-col gap-3">
-          {rows.map((row) => (
-            <Link key={row.candidateId} href={`/candidates/${row.candidateId}`}>
-              <Card className="transition-colors hover:bg-muted/50">
-                <CardHeader className="flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-base">{row.name || "Unknown"}</CardTitle>
-                  {row.cvStatus && (
-                    <Badge variant={row.cvStatus === "error" ? "destructive" : "secondary"}>
-                      {row.cvStatus}
-                    </Badge>
-                  )}
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  {row.email}
-                  {row.jobTitle && ` · applied to ${row.jobTitle}`}
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <CandidateList rows={rows} />
       )}
     </div>
   );

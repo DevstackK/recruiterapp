@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { scoreCandidate } from "./actions";
+import { deleteClosedJob, scoreCandidate, toggleJobStatus } from "./actions";
 
 export default async function JobDetailPage({
   params,
@@ -56,6 +56,25 @@ export default async function JobDetailPage({
             </Badge>
           )}
           <Badge variant={job.status === "open" ? "default" : "secondary"}>{job.status}</Badge>
+          <form action={toggleJobStatus}>
+            <input type="hidden" name="jobId" value={job.id} />
+            <input
+              type="hidden"
+              name="nextStatus"
+              value={job.status === "open" ? "closed" : "open"}
+            />
+            <Button type="submit" size="sm" variant="outline">
+              {job.status === "open" ? "Close job" : "Reopen job"}
+            </Button>
+          </form>
+          {job.status === "closed" && (
+            <form action={deleteClosedJob}>
+              <input type="hidden" name="jobId" value={job.id} />
+              <Button type="submit" size="sm" variant="destructive">
+                Delete
+              </Button>
+            </form>
+          )}
         </div>
       </div>
 

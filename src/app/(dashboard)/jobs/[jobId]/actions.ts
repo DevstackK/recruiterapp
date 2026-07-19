@@ -1,5 +1,6 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
@@ -47,4 +48,25 @@ export async function scoreCandidate(formData: FormData) {
   });
 
   revalidatePath(`/jobs/${jobId}`);
+}
+
+export async function toggleJobStatus(formData: FormData) {
+  const jobId = formData.get("jobId") as string;
+  const nextStatus = formData.get("nextStatus") as "open" | "closed";
+
+  await db.update(jobs).set({ status: nextStatus }).where(eq(jobs.id, jobId));
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath("/jobs");
+}
+
+// Only closed jobs can be deleted -- open roles must be closed first, so this can
+// never remove a role that's still live.
+export async function deleteClosedJob(formData: FormData) {
+  const jobId = formData.get("jobId") as string;
+
+  await db.delete(jobs).where(and(eq(jobs.id, jobId), eq(jobs.status, "closed")));
+
+  revalidatePath("/jobs");
+  redirect("/jobs");
 }
