@@ -6,7 +6,8 @@ import { db } from "@/lib/db/client";
 import { jobs, notifications } from "@/lib/db/schema";
 import { parseJobDescription } from "@/lib/anthropic/prompts/jd-parse";
 import { draftLinkedInPost } from "@/lib/anthropic/prompts/linkedin-post";
-import { publishLinkedInPost } from "@/lib/postiz/client";
+import { publishLinkedInPost, uploadImage, type PostizImageRef } from "@/lib/postiz/client";
+import { buildJobImagePrompt, generateImage } from "@/lib/magnific/client";
 import { uploadDocument } from "@/lib/storage";
 import { slugify } from "@/lib/slug";
 
@@ -66,10 +67,27 @@ export async function createJob(formData: FormData) {
   try {
     const applyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply/${slug}`;
     const postText = await draftLinkedInPost({ title, requirements: structuredRequirements, applyUrl });
-    const { postId } = await publishLinkedInPost(postText);
+
+    // Image generation is its own best-effort step nested inside: if it fails or times out,
+    // the post still goes out as text-only rather than failing the whole auto-post.
+    let image: PostizImageRef | undefined;
+    let imageUrl: string | null = null;
+    try {
+      const imagePrompt = buildJobImagePrompt(title, structuredRequirements);
+      const generated = await generateImage(imagePrompt);
+      const imageResponse = await fetch(generated.imageUrl);
+      if (!imageResponse.ok) throw new Error(`Failed to download generated image: HTTP ${imageResponse.status}`);
+      const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+      image = await uploadImage(imageBuffer, `${slug}.jpg`);
+      imageUrl = generated.imageUrl;
+    } catch {
+      // Non-fatal: proceed without an image.
+    }
+
+    const { postId } = await publishLinkedInPost(postText, image);
     await db
       .update(jobs)
-      .set({ linkedinPostId: postId, linkedinPostedAt: new Date() })
+      .set({ linkedinPostId: postId, linkedinPostedAt: new Date(), linkedinPostImageUrl: imageUrl })
       .where(eq(jobs.id, job.id));
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

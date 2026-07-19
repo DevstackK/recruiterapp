@@ -5,6 +5,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createJob } from "./actions";
 
+// createJob can take a while: JD parsing + LinkedIn post drafting + AI image generation
+// (which itself polls for up to ~45s) + publishing. Give it room on serverless platforms.
+export const maxDuration = 60;
+
 export default async function NewJobPage({
   searchParams,
 }: {

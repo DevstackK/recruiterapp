@@ -1,0 +1,1 @@
+ALTER TABLE "jobs" ADD COLUMN "linkedin_post_image_url" text;

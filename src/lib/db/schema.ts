@@ -68,6 +68,7 @@ export const jobs = pgTable("jobs", {
   publicUploadSlug: text("public_upload_slug").notNull().unique(),
   linkedinPostId: text("linkedin_post_id"),
   linkedinPostedAt: timestamp("linkedin_posted_at", { withTimezone: true }),
+  linkedinPostImageUrl: text("linkedin_post_image_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

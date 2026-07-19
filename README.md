@@ -15,8 +15,9 @@ milestones; each phase is independently demoable.
 - **JD parsing** — paste text or upload a PDF; Claude extracts title, seniority, skills, and
   splits requirements into must-haves vs. nice-to-haves.
 - **Auto-post to LinkedIn** — the moment a job is parsed, a hiring-announcement post (with the
-  must-haves and an apply link) is drafted and published to your own connected LinkedIn account
-  via Postiz. Never blocks job creation if it fails.
+  must-haves and an apply link), plus an AI-generated accompanying image (via Freepik/Magnific),
+  is drafted and published to your own connected LinkedIn account via Postiz. Never blocks job
+  creation if posting or image generation fails — a text-only post (or no post) is fine too.
 - **Public apply page** — every job gets a shareable link (`/apply/<slug>`) where candidates
   upload a CV (PDF or DOCX), no login required.
 - **Email intake** — candidates can also email their CV directly to a per-job address
@@ -127,9 +128,13 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
      (a `localhost` link isn't clickable from LinkedIn).
    - If posting fails for any reason, job creation still succeeds — a `linkedin_post_failed`
      notification is raised instead of blocking you.
-5. **Vercel** — connect the repo, set all env vars from `.env.local.example` (generate
+5. **Freepik** (optional but recommended) — generates an AI image to attach to each LinkedIn
+   post, via the Magnific "Mystic" model. Get an API key from your Freepik account's API
+   dashboard and put it in `FREEPIK_API_KEY`. Entirely non-fatal if unset or the generation
+   fails/times out (~45s ceiling) — the post still goes out, just without an image.
+6. **Vercel** — connect the repo, set all env vars from `.env.local.example` (generate
    `CRON_SECRET` with `openssl rand -base64 32`), deploy.
-6. **GitHub Actions** — the workflow at `.github/workflows/orchestrate.yml` runs the autonomous
+7. **GitHub Actions** — the workflow at `.github/workflows/orchestrate.yml` runs the autonomous
    loop (poll Gmail → auto-score newly parsed CVs → notify on high matches) every 15 minutes. Add
    two repo secrets (Settings → Secrets and variables → Actions):
    - `CRON_SECRET` — same value as the Vercel env var

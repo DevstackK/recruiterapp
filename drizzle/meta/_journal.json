@@ -15,6 +15,13 @@
       "when": 1784476999695,
       "tag": "0001_heavy_tomorrow_man",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784479521597,
+      "tag": "0002_marvelous_shiva",
+      "breakpoints": true
     }
   ]
 }

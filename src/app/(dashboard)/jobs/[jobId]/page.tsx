@@ -59,6 +59,22 @@ export default async function JobDetailPage({
         </div>
       </div>
 
+      {job.linkedinPostImageUrl && (
+        <Card>
+          <CardHeader>
+            <CardTitle>LinkedIn post image</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* eslint-disable-next-line @next/next/no-img-element -- external, unpredictable host, not worth Next/Image remotePatterns config */}
+            <img
+              src={job.linkedinPostImageUrl}
+              alt="AI-generated image used in the LinkedIn post"
+              className="max-h-80 rounded-md border object-cover"
+            />
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Public apply link</CardTitle>
