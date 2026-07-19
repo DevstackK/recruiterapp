@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login } from "./actions";
@@ -12,12 +12,31 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Recruiter Agent</CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className="flex min-h-screen">
+      <div className="relative hidden w-1/2 md:block">
+        <Image
+          src="/login-network.jpg"
+          alt=""
+          fill
+          priority
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-background/50" />
+        <p className="absolute bottom-10 left-10 right-10 max-w-sm text-lg leading-snug font-medium text-foreground">
+          Agentic recruiting: parse job descriptions, screen CVs, match candidates, and draft
+          outreach.
+        </p>
+      </div>
+
+      <div className="relative flex w-full flex-col items-center justify-center p-4 md:w-1/2">
+        <div className="flex w-full max-w-sm flex-col gap-8">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
+              RA
+            </div>
+            <span className="text-lg font-semibold">Recruiter Agent</span>
+          </div>
+
           <form action={login} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">Email</Label>
@@ -38,19 +57,20 @@ export default async function LoginPage({
               Sign in
             </Button>
           </form>
-        </CardContent>
-      </Card>
-      <p className="absolute bottom-4 text-center text-xs text-muted-foreground">
-        Powered by{" "}
-        <a
-          href="https://kloudstack.co.uk"
-          target="_blank"
-          rel="noreferrer"
-          className="hover:text-foreground hover:underline"
-        >
-          kloudstack.co.uk
-        </a>
-      </p>
+        </div>
+
+        <p className="absolute bottom-4 text-center text-xs text-muted-foreground">
+          Powered by{" "}
+          <a
+            href="https://kloudstack.co.uk"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:text-foreground hover:underline"
+          >
+            kloudstack.co.uk
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
