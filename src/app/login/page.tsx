@@ -12,7 +12,7 @@ export default async function LoginPage({
   const { error } = await searchParams;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Recruiter Agent</CardTitle>
@@ -40,6 +40,17 @@ export default async function LoginPage({
           </form>
         </CardContent>
       </Card>
+      <p className="absolute bottom-4 text-center text-xs text-muted-foreground">
+        Powered by{" "}
+        <a
+          href="https://kloudstack.co.uk"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:text-foreground hover:underline"
+        >
+          kloudstack.co.uk
+        </a>
+      </p>
     </div>
   );
 }

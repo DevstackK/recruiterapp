@@ -46,6 +46,7 @@ export const notificationTypeEnum = pgEnum("notification_type", [
 ]);
 export const apiUsagePurposeEnum = pgEnum("api_usage_purpose", [
   "jd_parse",
+  "jd_generate",
   "cv_parse",
   "match_score",
   "outreach_draft",

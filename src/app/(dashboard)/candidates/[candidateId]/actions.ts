@@ -1,9 +1,10 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { cvs } from "@/lib/db/schema";
+import { candidates, cvs, matches, notifications } from "@/lib/db/schema";
 import { parseCvFile } from "@/lib/parsing/cv";
 
 export async function retryParseCv(formData: FormData) {
@@ -37,4 +38,36 @@ export async function retryParseCv(formData: FormData) {
   }
 
   revalidatePath(`/candidates/${candidateId}`);
+}
+
+export async function deleteCandidate(formData: FormData) {
+  const candidateId = formData.get("candidateId") as string;
+
+  await db.transaction(async (tx) => {
+    const candidateCvs = await tx
+      .select({ id: cvs.id })
+      .from(cvs)
+      .where(eq(cvs.candidateId, candidateId));
+    const cvIds = candidateCvs.map((cv) => cv.id);
+
+    if (cvIds.length > 0) {
+      const candidateMatches = await tx
+        .select({ id: matches.id })
+        .from(matches)
+        .where(inArray(matches.cvId, cvIds));
+      const matchIds = candidateMatches.map((m) => m.id);
+
+      if (matchIds.length > 0) {
+        await tx.delete(notifications).where(inArray(notifications.relatedMatchId, matchIds));
+        await tx.delete(matches).where(inArray(matches.id, matchIds));
+      }
+
+      await tx.delete(cvs).where(inArray(cvs.id, cvIds));
+    }
+
+    await tx.delete(candidates).where(eq(candidates.id, candidateId));
+  });
+
+  revalidatePath("/candidates");
+  redirect("/candidates");
 }

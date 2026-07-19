@@ -1,0 +1,1 @@
+ALTER TYPE "public"."api_usage_purpose" ADD VALUE 'jd_generate' BEFORE 'cv_parse';

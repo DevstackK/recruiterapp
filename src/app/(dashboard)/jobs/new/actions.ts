@@ -5,11 +5,21 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { jobs, notifications } from "@/lib/db/schema";
 import { parseJobDescription } from "@/lib/anthropic/prompts/jd-parse";
+import { generateJdFromTitle } from "@/lib/anthropic/prompts/jd-generate";
 import { draftLinkedInPost } from "@/lib/anthropic/prompts/linkedin-post";
 import { publishLinkedInPost, uploadImage, type PostizImageRef } from "@/lib/postiz/client";
 import { buildJobImagePrompt, generateImage } from "@/lib/magnific/client";
 import { uploadDocument } from "@/lib/storage";
 import { slugify } from "@/lib/slug";
+
+/** Called directly from the client (not a form action) by the "Generate JD" button. */
+export async function generateJdDraft(title: string): Promise<string> {
+  const trimmed = title.trim();
+  if (!trimmed) {
+    throw new Error("Enter a job title first");
+  }
+  return generateJdFromTitle(trimmed);
+}
 
 export async function createJob(formData: FormData) {
   const title = (formData.get("title") as string)?.trim();

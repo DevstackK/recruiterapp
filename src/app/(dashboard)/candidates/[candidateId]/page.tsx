@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { retryParseCv } from "./actions";
+import { DeleteCandidateButton } from "./delete-candidate-button";
 
 export default async function CandidateDetailPage({
   params,
@@ -43,11 +44,14 @@ export default async function CandidateDetailPage({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold">{candidate.name || "Unknown candidate"}</h1>
-        <p className="text-sm text-muted-foreground">
-          {candidate.email} {candidate.phone && `· ${candidate.phone}`} · via {candidate.source}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">{candidate.name || "Unknown candidate"}</h1>
+          <p className="text-sm text-muted-foreground">
+            {candidate.email} {candidate.phone && `· ${candidate.phone}`} · via {candidate.source}
+          </p>
+        </div>
+        <DeleteCandidateButton candidateId={candidate.id} />
       </div>
 
       {candidateCvs.map((cv) => (

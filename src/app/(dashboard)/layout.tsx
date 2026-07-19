@@ -61,6 +61,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       )}
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+      <footer className="border-t px-4 py-4 text-center text-xs text-muted-foreground">
+        Powered by{" "}
+        <a
+          href="https://kloudstack.co.uk"
+          target="_blank"
+          rel="noreferrer"
+          className="hover:text-foreground hover:underline"
+        >
+          kloudstack.co.uk
+        </a>
+      </footer>
     </div>
   );
 }
