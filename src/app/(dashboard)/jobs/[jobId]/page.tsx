@@ -1,10 +1,13 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { jobs } from "@/lib/db/schema";
+import { candidates, cvs, jobs, matches } from "@/lib/db/schema";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { scoreCandidate } from "./actions";
 
 export default async function JobDetailPage({
   params,
@@ -19,6 +22,23 @@ export default async function JobDetailPage({
   }
 
   const req = job.structuredRequirements;
+
+  const applicants = await db
+    .select({
+      cvId: cvs.id,
+      cvStatus: cvs.status,
+      candidateId: candidates.id,
+      candidateName: candidates.name,
+      matchId: matches.id,
+      matchScore: matches.score,
+      matchStatus: matches.status,
+      matchSummary: matches.rationale,
+    })
+    .from(cvs)
+    .innerJoin(candidates, eq(candidates.id, cvs.candidateId))
+    .leftJoin(matches, and(eq(matches.cvId, cvs.id), eq(matches.jobId, jobId)))
+    .where(eq(cvs.jobId, jobId))
+    .orderBy(desc(cvs.createdAt));
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -86,6 +106,53 @@ export default async function JobDetailPage({
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Applicants</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          {applicants.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No applicants yet.</p>
+          ) : (
+            applicants.map((a) => (
+              <div
+                key={a.cvId}
+                className="flex items-center justify-between gap-4 rounded-md border p-3"
+              >
+                <div className="flex flex-col gap-1">
+                  <Link href={`/candidates/${a.candidateId}`} className="font-medium hover:underline">
+                    {a.candidateName || "Unknown"}
+                  </Link>
+                  {a.matchSummary && (
+                    <p className="text-sm text-muted-foreground">{a.matchSummary.summary}</p>
+                  )}
+                </div>
+                <div className="flex shrink-0 items-center gap-3">
+                  {a.cvStatus !== "parsed" ? (
+                    <Badge variant={a.cvStatus === "error" ? "destructive" : "secondary"}>
+                      CV {a.cvStatus}
+                    </Badge>
+                  ) : a.matchId ? (
+                    <>
+                      <Badge>{Number(a.matchScore).toFixed(0)} / 100</Badge>
+                      <Badge variant="secondary">{a.matchStatus}</Badge>
+                    </>
+                  ) : (
+                    <form action={scoreCandidate}>
+                      <input type="hidden" name="cvId" value={a.cvId} />
+                      <input type="hidden" name="jobId" value={jobId} />
+                      <Button type="submit" size="sm" variant="outline">
+                        Score
+                      </Button>
+                    </form>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
 
       {job.rawJdText && (
         <Card>
