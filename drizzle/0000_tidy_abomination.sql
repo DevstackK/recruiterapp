@@ -121,13 +121,6 @@ CREATE TABLE "outreach_drafts" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "users" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"email" text NOT NULL,
-	"name" text,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL
-);
---> statement-breakpoint
 ALTER TABLE "cvs" ADD CONSTRAINT "cvs_candidate_id_candidates_id_fk" FOREIGN KEY ("candidate_id") REFERENCES "public"."candidates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cvs" ADD CONSTRAINT "cvs_job_id_jobs_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."jobs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "cvs" ADD CONSTRAINT "cvs_source_email_id_inbound_emails_id_fk" FOREIGN KEY ("source_email_id") REFERENCES "public"."inbound_emails"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

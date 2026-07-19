@@ -50,13 +50,6 @@ export const apiUsagePurposeEnum = pgEnum("api_usage_purpose", [
   "outreach_draft",
 ]);
 
-export const users = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  email: text("email").notNull(),
-  name: text("name"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-});
-
 export const jobs = pgTable("jobs", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: text("title").notNull(),

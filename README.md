@@ -17,17 +17,24 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
 
 1. **Anthropic API key** — console.anthropic.com. Put it in `.env.local` as `ANTHROPIC_API_KEY`. Never
    commit it or paste it into chat/docs.
-2. **Supabase project** — create a project at supabase.com.
+2. **Supabase project** — create a project at supabase.com (or use an existing one — see the
+   shared-project note below if so).
    - Project Settings → API: copy the URL and anon key into `NEXT_PUBLIC_SUPABASE_URL` /
      `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-   - Project Settings → Database → Connection string (use the pooler/"Transaction" URI) into
-     `DATABASE_URL`.
+   - Project Settings → Database → Connection string: use the **Session pooler** URI (not
+     Transaction — `drizzle-kit migrate` needs session-level features), and add `?sslmode=require`
+     if it isn't already using SSL. Put it in `DATABASE_URL`.
    - Create a Storage bucket named `documents` (holds both JD files and CVs).
    - Project Settings → API: also copy the **service_role** key into `SUPABASE_SERVICE_ROLE_KEY`
      (server-only — used for Storage uploads; never expose this to the browser).
    - Auth → create the one recruiter user (email/password).
-   - Run `npm run db:migrate` to apply `drizzle/0000_cynical_hawkeye.sql` (all 11 tables) against
-     your database. Use `npm run db:push` instead only for quick local schema tweaks after that.
+   - Run `npm run db:migrate` to apply the migration in `drizzle/` (all 10 tables) against your
+     database.
+   - **⚠️ If this Supabase project is shared with another app**: do NOT run `npm run db:push` here.
+     `push` introspects the *entire* public schema and will offer to **drop any table not in this
+     app's `schema.ts`**, including another app's tables and data. `db:migrate` is safe in a shared
+     project (it only ever runs this app's own tracked `CREATE`/`ALTER` statements); `db:push` is
+     only safe in a database dedicated solely to this app.
 3. **Google Cloud Console** (for Gmail — Phase 5 is now built, this is required to use it):
    - Create a project, enable the Gmail API.
    - OAuth consent screen: External, Testing, add your own Gmail as a test user, scope
@@ -77,6 +84,6 @@ Open http://localhost:3000.
 ```bash
 npm run db:generate   # generate a migration from schema.ts changes
 npm run db:migrate     # apply pending migrations from drizzle/
-npm run db:push        # push schema directly, skipping migration files (fine for quick local tweaks)
+npm run db:push        # DANGEROUS in a shared database -- see warning above. Only use in a DB dedicated to this app.
 npm run db:studio      # browse the database
 ```
