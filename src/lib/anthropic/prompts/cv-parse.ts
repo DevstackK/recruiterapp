@@ -37,5 +37,6 @@ export async function parseCv(input: CvInput): Promise<CvProfile> {
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content }],
     zodSchema: cvProfileSchema,
+    purpose: "cv_parse",
   });
 }

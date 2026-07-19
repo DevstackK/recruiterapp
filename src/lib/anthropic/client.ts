@@ -6,6 +6,10 @@ if (!process.env.ANTHROPIC_API_KEY) {
 
 export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
+  // Default is 2; this app's calls run in background/batch contexts (CV parsing, matching,
+  // the cron orchestrator) where waiting a bit longer beats failing a whole batch on a
+  // transient 429/5xx. The SDK already backs off exponentially between attempts.
+  maxRetries: 5,
 });
 
 export const MODELS = {

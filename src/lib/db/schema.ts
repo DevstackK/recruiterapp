@@ -43,6 +43,12 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "parse_error",
   "gmail_reconnect_needed",
 ]);
+export const apiUsagePurposeEnum = pgEnum("api_usage_purpose", [
+  "jd_parse",
+  "cv_parse",
+  "match_score",
+  "outreach_draft",
+]);
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -189,4 +195,16 @@ export const gmailCredentials = pgTable("gmail_credentials", {
   scopes: text("scopes").notNull(),
   connectedAt: timestamp("connected_at", { withTimezone: true }).defaultNow().notNull(),
   lastRefreshError: text("last_refresh_error"),
+});
+
+export const apiUsageLog = pgTable("api_usage_log", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  purpose: apiUsagePurposeEnum("purpose").notNull(),
+  model: text("model").notNull(),
+  inputTokens: integer("input_tokens").notNull(),
+  outputTokens: integer("output_tokens").notNull(),
+  cacheCreationInputTokens: integer("cache_creation_input_tokens").default(0).notNull(),
+  cacheReadInputTokens: integer("cache_read_input_tokens").default(0).notNull(),
+  estimatedCostUsd: numeric("estimated_cost_usd").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

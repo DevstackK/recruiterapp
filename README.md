@@ -26,7 +26,8 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
    - Project Settings → API: also copy the **service_role** key into `SUPABASE_SERVICE_ROLE_KEY`
      (server-only — used for Storage uploads; never expose this to the browser).
    - Auth → create the one recruiter user (email/password).
-   - Run `npm run db:push` to create tables from `src/lib/db/schema.ts`.
+   - Run `npm run db:migrate` to apply `drizzle/0000_cynical_hawkeye.sql` (all 11 tables) against
+     your database. Use `npm run db:push` instead only for quick local schema tweaks after that.
 3. **Google Cloud Console** (for Gmail — Phase 5 is now built, this is required to use it):
    - Create a project, enable the Gmail API.
    - OAuth consent screen: External, Testing, add your own Gmail as a test user, scope
@@ -75,6 +76,7 @@ Open http://localhost:3000.
 
 ```bash
 npm run db:generate   # generate a migration from schema.ts changes
-npm run db:push        # push schema directly (fine for solo/early development)
+npm run db:migrate     # apply pending migrations from drizzle/
+npm run db:push        # push schema directly, skipping migration files (fine for quick local tweaks)
 npm run db:studio      # browse the database
 ```

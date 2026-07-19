@@ -1,5 +1,6 @@
 import { anthropic, MODELS } from "../client";
 import type { JdRequirements } from "../schemas";
+import { logApiUsage } from "../usage";
 
 const SYSTEM_PROMPT = `You draft short, warm, professional recruiting outreach messages suitable for sending as a
 LinkedIn direct message or InMail. Keep it concise (under 120 words), reference the specific role and why the
@@ -48,6 +49,8 @@ export async function draftOutreachMessage({
       },
     ],
   });
+
+  logApiUsage("outreach_draft", MODELS.fast, response.usage).catch(() => {});
 
   const textBlock = response.content.find((block) => block.type === "text");
   if (!textBlock || textBlock.type !== "text") {

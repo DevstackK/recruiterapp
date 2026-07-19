@@ -35,5 +35,6 @@ export async function parseJobDescription(input: JdInput): Promise<JdRequirement
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content }],
     zodSchema: jdRequirementsSchema,
+    purpose: "jd_parse",
   });
 }

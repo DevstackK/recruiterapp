@@ -46,5 +46,6 @@ export async function scoreMatch(
       },
     ],
     zodSchema: matchResultSchema,
+    purpose: "match_score",
   });
 }

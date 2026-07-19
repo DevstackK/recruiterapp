@@ -3,8 +3,10 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { candidates, cvs, jobs } from "@/lib/db/schema";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { retryParseCv } from "./actions";
 
 export default async function CandidateDetailPage({
   params,
@@ -62,7 +64,16 @@ export default async function CandidateDetailPage({
             </a>
 
             {cv.status === "error" && (
-              <p className="text-destructive">{cv.errorDetail}</p>
+              <div className="flex flex-col gap-2">
+                <p className="text-destructive">{cv.errorDetail}</p>
+                <form action={retryParseCv}>
+                  <input type="hidden" name="cvId" value={cv.id} />
+                  <input type="hidden" name="candidateId" value={candidateId} />
+                  <Button type="submit" size="sm" variant="outline">
+                    Retry parse
+                  </Button>
+                </form>
+              </div>
             )}
 
             {cv.structuredProfile && (
