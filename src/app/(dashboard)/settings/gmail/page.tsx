@@ -48,7 +48,11 @@ export default async function GmailSettingsPage({
               Connect your Gmail account so CVs sent by email get pulled in automatically.
               Read-only access only.
             </p>
-            <Button render={<a href="/api/gmail/connect">Connect Gmail</a>} className="self-start" />
+            <Button
+              render={<a href="/api/gmail/connect">Connect Gmail</a>}
+              nativeButton={false}
+              className="self-start"
+            />
           </CardContent>
         </Card>
       ) : (
@@ -77,6 +81,7 @@ export default async function GmailSettingsPage({
               </form>
               <Button
                 render={<a href="/api/gmail/connect">Reconnect</a>}
+                nativeButton={false}
                 size="sm"
                 variant="outline"
               />

@@ -20,11 +20,7 @@ export default async function NewJobPage({
           <CardTitle>Paste or upload a job description</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
-            action={createJob}
-            encType="multipart/form-data"
-            className="flex flex-col gap-4"
-          >
+          <form action={createJob} className="flex flex-col gap-4">
             <div className="flex flex-col gap-2">
               <Label htmlFor="title">Job title</Label>
               <Input id="title" name="title" required placeholder="Senior Backend Engineer" />

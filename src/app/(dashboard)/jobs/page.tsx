@@ -13,7 +13,7 @@ export default async function JobsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Jobs</h1>
-        <Button render={<Link href="/jobs/new">New job</Link>} />
+        <Button render={<Link href="/jobs/new">New job</Link>} nativeButton={false} />
       </div>
 
       {allJobs.length === 0 ? (

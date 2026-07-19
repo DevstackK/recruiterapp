@@ -50,11 +50,7 @@ export default async function ApplyPage({
             <CardTitle>Apply for {job.title}</CardTitle>
           </CardHeader>
           <CardContent>
-            <form
-              action={boundApply}
-              encType="multipart/form-data"
-              className="flex flex-col gap-4"
-            >
+            <form action={boundApply} className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="name">Full name</Label>
                 <Input id="name" name="name" required />

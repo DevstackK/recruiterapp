@@ -27,7 +27,7 @@ export default async function OutreachPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Outreach</h1>
-        <Button render={<Link href="/outreach/new">New draft</Link>} />
+        <Button render={<Link href="/outreach/new">New draft</Link>} nativeButton={false} />
       </div>
       <p className="text-sm text-muted-foreground">
         Drafts here are never sent automatically. Copy the text and send it yourself through
