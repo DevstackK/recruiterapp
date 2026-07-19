@@ -2,6 +2,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { logout } from "@/app/login/actions";
 
+// Every page in this route group reads live, per-request data behind an auth
+// gate (jobs, matches, candidates, etc.) -- never statically prerenderable.
+export const dynamic = "force-dynamic";
+
 const NAV_ITEMS = [
   { href: "/jobs", label: "Jobs" },
   { href: "/candidates", label: "Candidates" },

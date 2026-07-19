@@ -22,7 +22,9 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
      `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
    - Project Settings → Database → Connection string (use the pooler/"Transaction" URI) into
      `DATABASE_URL`.
-   - Create a Storage bucket named `cvs`.
+   - Create a Storage bucket named `documents` (holds both JD files and CVs).
+   - Project Settings → API: also copy the **service_role** key into `SUPABASE_SERVICE_ROLE_KEY`
+     (server-only — used for Storage uploads; never expose this to the browser).
    - Auth → create the one recruiter user (email/password).
    - Run `npm run db:push` to create tables from `src/lib/db/schema.ts`.
 3. **Google Cloud Console** (for Gmail, needed starting Phase 5):
