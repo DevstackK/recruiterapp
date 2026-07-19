@@ -1,0 +1,23 @@
+name: Orchestrate recruiter agent
+
+on:
+  schedule:
+    # Every 15 minutes. GitHub may delay a few minutes under load -- the orchestrator
+    # is idempotent per run, so a missed or delayed tick is harmless.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  orchestrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger orchestration endpoint
+        run: |
+          status=$(curl -s -o /tmp/response.json -w "%{http_code}" -X POST \
+            "${{ secrets.APP_URL }}/api/cron/orchestrate" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}")
+          echo "HTTP status: $status"
+          cat /tmp/response.json
+          if [ "$status" -ge 300 ]; then
+            exit 1
+          fi

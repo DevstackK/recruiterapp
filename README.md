@@ -40,8 +40,8 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
      stored refresh token at rest; losing/rotating it invalidates the stored connection (just
      reconnect via the Settings page).
    - In the app, go to **Settings → Gmail connection** and click **Connect Gmail**, then approve
-     access as your own Gmail account. Use **Check Gmail now** to pull in CVs manually until
-     Phase 6 automates it on a schedule.
+     access as your own Gmail account. **Check Gmail now** triggers the same poll manually; the
+     GitHub Actions cron (below) automates it every 15 minutes.
    - **Routing replies to the right job**: each job's public apply page instructs candidates to
      email their CV to `you+job-<slug>@gmail.com` (a Gmail "plus address" — mail still lands in
      your normal inbox). The poller reads the `To:` header to link the CV to that job
@@ -49,9 +49,17 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
    - Testing-mode OAuth consent screens can require re-consent periodically for sensitive scopes.
      If Gmail checks start failing, the Settings page will show a "Reconnect needed" banner —
      just click Connect again.
-4. **Vercel** — connect the repo, set all env vars from `.env.local.example`, deploy.
-5. **GitHub Actions** — add a `CRON_SECRET` repo secret matching the Vercel env var (needed starting
-   Phase 6).
+4. **Vercel** — connect the repo, set all env vars from `.env.local.example` (generate
+   `CRON_SECRET` with `openssl rand -base64 32`), deploy.
+5. **GitHub Actions** — the workflow at `.github/workflows/orchestrate.yml` runs the autonomous
+   loop (poll Gmail → auto-score newly parsed CVs → notify on high matches) every 15 minutes. Add
+   two repo secrets (Settings → Secrets and variables → Actions):
+   - `CRON_SECRET` — same value as the Vercel env var
+   - `APP_URL` — your deployed app's base URL (e.g. `https://<app>.vercel.app`, no trailing slash)
+
+   It never auto-approves a match or sends outreach — those always require you, in the dashboard.
+   Trigger it manually anytime from the Actions tab (`workflow_dispatch`) instead of waiting 15
+   minutes.
 
 Copy `.env.local.example` to `.env.local` and fill in values for local development.
 
