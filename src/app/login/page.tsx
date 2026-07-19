@@ -22,9 +22,8 @@ export default async function LoginPage({
           className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-background/50" />
-        <p className="absolute bottom-10 left-10 right-10 max-w-sm text-lg leading-snug font-medium text-foreground">
-          Agentic recruiting: parse job descriptions, screen CVs, match candidates, and draft
-          outreach.
+        <p className="absolute bottom-10 left-10 text-lg font-medium text-foreground">
+          Agentic Recruiting
         </p>
       </div>
 
