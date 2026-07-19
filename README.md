@@ -10,6 +10,58 @@ ever scrapes LinkedIn, searches for candidates, or messages anyone automatically
 See `.claude`-adjacent plan doc for full architecture rationale. Build order below tracks the phased
 milestones; each phase is independently demoable.
 
+## Features
+
+- **JD parsing** — paste text or upload a PDF; Claude extracts title, seniority, skills, and
+  splits requirements into must-haves vs. nice-to-haves.
+- **Auto-post to LinkedIn** — the moment a job is parsed, a hiring-announcement post (with the
+  must-haves and an apply link) is drafted and published to your own connected LinkedIn account
+  via Postiz. Never blocks job creation if it fails.
+- **Public apply page** — every job gets a shareable link (`/apply/<slug>`) where candidates
+  upload a CV (PDF or DOCX), no login required.
+- **Email intake** — candidates can also email their CV directly to a per-job address
+  (`you+job-<slug>@gmail.com`); the app polls your Gmail and links replies to the right job
+  automatically.
+- **CV parsing** — native PDF/DOCX extraction into a structured profile (skills, experience,
+  education, contact info).
+- **AI matching** — scores each CV against a job's requirements (0–100) with a rationale:
+  strengths, concerns, and specific must-have gaps — not just a number.
+- **Human-in-the-loop review** — every match sits in a pending-review queue until you approve
+  or reject it; nothing downstream happens automatically.
+- **Autonomous background loop** — a scheduled job (every 15 min via GitHub Actions, or on
+  demand) polls Gmail, auto-scores newly parsed CVs, and raises a notification for high-scoring
+  matches (≥80) — all without you clicking anything, up to the review gate.
+- **Compliant outreach drafts** — for candidates you find manually (e.g. via LinkedIn search),
+  the app drafts a personalized outreach message for you to copy and send yourself. Nothing ever
+  scrapes profiles, searches LinkedIn, or messages anyone automatically.
+- **Notifications** — parse failures, Gmail connection issues, and high-scoring matches all
+  surface in one place instead of failing silently.
+- **Usage & cost tracking** — every Claude API call is logged with token counts and an
+  estimated cost, broken down by purpose (JD parsing, CV parsing, matching, outreach, LinkedIn
+  posts).
+
+## How to use it
+
+1. **Sign in** with the recruiter account created during setup.
+2. **Post a job** (`Jobs → New job`): paste the JD text or upload a PDF. Claude parses it into
+   structured requirements, and (if Postiz is configured) a hiring announcement is posted to
+   LinkedIn automatically. You get a public apply link and, if Gmail is connected, an email
+   alias — share either (or both) with candidates.
+3. **Candidates apply** via the link or by emailing their CV — no action needed from you; CVs
+   are parsed automatically as they come in (`Candidates` shows each one's structured profile,
+   or an error + "Retry parse" if extraction failed).
+4. **Score candidates**: click **Score** next to an applicant on the job page (or wait — the
+   scheduled background loop does this automatically for any parsed CV linked to a job).
+5. **Review matches** (`Matches`): each pending match shows a score and rationale. Click
+   **Approve** or **Reject** — this is the one gate nothing skips.
+6. **Source candidates manually** (optional): if you find someone yourself (e.g. searching
+   LinkedIn), go to `Outreach → New draft`, fill in what you know about them, and the app
+   drafts a message. Copy it and send it yourself through LinkedIn; update its status
+   (sent/replied/declined) as things progress.
+7. **Check `Notifications`** periodically (or watch for the red banner) for anything that
+   needs attention — a parse failure, a Gmail reconnect, or a new high-scoring match.
+8. **Check `Usage`** anytime to see how much Claude API usage this month's activity has cost.
+
 ## Stack
 
 Next.js 16 (App Router) + TypeScript, Tailwind + shadcn/ui, Supabase (Postgres/Auth/Storage) via Drizzle
