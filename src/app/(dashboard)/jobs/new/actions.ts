@@ -1,9 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { jobs } from "@/lib/db/schema";
+import { jobs, notifications } from "@/lib/db/schema";
 import { parseJobDescription } from "@/lib/anthropic/prompts/jd-parse";
+import { draftLinkedInPost } from "@/lib/anthropic/prompts/linkedin-post";
+import { publishLinkedInPost } from "@/lib/postiz/client";
 import { uploadDocument } from "@/lib/storage";
 import { slugify } from "@/lib/slug";
 
@@ -57,6 +60,24 @@ export async function createJob(formData: FormData) {
       publicUploadSlug: slug,
     })
     .returning({ id: jobs.id });
+
+  // Auto-post to LinkedIn via Postiz -- best-effort: a failure here must never block job
+  // creation, since the job itself parsed successfully and should still be usable.
+  try {
+    const applyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply/${slug}`;
+    const postText = await draftLinkedInPost({ title, requirements: structuredRequirements, applyUrl });
+    const { postId } = await publishLinkedInPost(postText);
+    await db
+      .update(jobs)
+      .set({ linkedinPostId: postId, linkedinPostedAt: new Date() })
+      .where(eq(jobs.id, job.id));
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    await db.insert(notifications).values({
+      type: "linkedin_post_failed",
+      message: `Failed to auto-post "${title}" to LinkedIn: ${message}. Job id: ${job.id}`,
+    });
+  }
 
   redirect(`/jobs/${job.id}`);
 }

@@ -42,12 +42,14 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "new_high_match",
   "parse_error",
   "gmail_reconnect_needed",
+  "linkedin_post_failed",
 ]);
 export const apiUsagePurposeEnum = pgEnum("api_usage_purpose", [
   "jd_parse",
   "cv_parse",
   "match_score",
   "outreach_draft",
+  "linkedin_post",
 ]);
 
 export const jobs = pgTable("jobs", {
@@ -64,6 +66,8 @@ export const jobs = pgTable("jobs", {
   }>(),
   status: jobStatusEnum("status").default("draft").notNull(),
   publicUploadSlug: text("public_upload_slug").notNull().unique(),
+  linkedinPostId: text("linkedin_post_id"),
+  linkedinPostedAt: timestamp("linkedin_posted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });

@@ -1,9 +1,11 @@
 # Recruiter Agent
 
 Agentic recruiting workflow: paste a job description, get it parsed into structured requirements,
-receive CVs by email or public upload form, have them parsed and scored against open jobs, and review
-matches in a dashboard. Outreach message drafts are generated for you to send yourself — nothing is ever
-sent automatically to LinkedIn or any other platform.
+automatically post a hiring announcement to your own LinkedIn (via Postiz), receive CVs by email or
+public upload form, have them parsed and scored against open jobs, and review matches in a dashboard.
+Outreach message drafts to *candidates* are generated for you to send yourself — the only thing ever
+posted automatically is your own hiring announcement to your own connected LinkedIn account; nothing
+ever scrapes LinkedIn, searches for candidates, or messages anyone automatically.
 
 See `.claude`-adjacent plan doc for full architecture rationale. Build order below tracks the phased
 milestones; each phase is independently demoable.
@@ -21,9 +23,13 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
    shared-project note below if so).
    - Project Settings → API: copy the URL and anon key into `NEXT_PUBLIC_SUPABASE_URL` /
      `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-   - Project Settings → Database → Connection string: use the **Session pooler** URI (not
-     Transaction — `drizzle-kit migrate` needs session-level features), and add `?sslmode=require`
-     if it isn't already using SSL. Put it in `DATABASE_URL`.
+   - Project Settings → Database → Connection string: copy the **Transaction pooler** URI (port
+     6543) into `DATABASE_URL` — this is what the running app uses, and it's built for many
+     short-lived connections. Copy the **Session pooler** URI (port 5432, same host/user/password)
+     into `DIRECT_URL` — `drizzle-kit migrate`/`generate` need session-level features (advisory
+     locks) that transaction-mode pgbouncer doesn't support. Both need SSL (`ssl=require` if not
+     already default). **Using the Session pooler for the app itself will exhaust its connection
+     limit under normal dev-server hot-reloading** (`EMAXCONNSESSION` errors) — keep the split.
    - Create a Storage bucket named `documents` (holds both JD files and CVs).
    - Project Settings → API: also copy the **service_role** key into `SUPABASE_SERVICE_ROLE_KEY`
      (server-only — used for Storage uploads; never expose this to the browser).
@@ -57,9 +63,21 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
    - Testing-mode OAuth consent screens can require re-consent periodically for sensitive scopes.
      If Gmail checks start failing, the Settings page will show a "Reconnect needed" banner —
      just click Connect again.
-4. **Vercel** — connect the repo, set all env vars from `.env.local.example` (generate
+4. **Postiz** (self-hosted or cloud) — auto-posts a hiring announcement to LinkedIn the moment a
+   job is parsed, using Postiz's Public API to post to your own connected LinkedIn account (this is
+   not candidate sourcing/messaging -- it's your own content, posted the way you'd post it yourself).
+   - Postiz → Settings → Developers → Public API: reveal and copy the API key into `POSTIZ_API_KEY`.
+   - Self-hosted base URL is `https://<your-postiz-domain>/api/public/v1`; put it in `POSTIZ_BASE_URL`.
+   - Find the LinkedIn integration id: `curl -H "Authorization: <key>" <base-url>/integrations` and
+     match the entry with `"identifier": "linkedin"` (personal profile) or `"linkedin-page"` (company
+     page) — use its `id` for `POSTIZ_LINKEDIN_INTEGRATION_ID`.
+   - Set `NEXT_PUBLIC_APP_URL` to this app's public base URL so the apply link in the post resolves
+     (a `localhost` link isn't clickable from LinkedIn).
+   - If posting fails for any reason, job creation still succeeds — a `linkedin_post_failed`
+     notification is raised instead of blocking you.
+5. **Vercel** — connect the repo, set all env vars from `.env.local.example` (generate
    `CRON_SECRET` with `openssl rand -base64 32`), deploy.
-5. **GitHub Actions** — the workflow at `.github/workflows/orchestrate.yml` runs the autonomous
+6. **GitHub Actions** — the workflow at `.github/workflows/orchestrate.yml` runs the autonomous
    loop (poll Gmail → auto-score newly parsed CVs → notify on high matches) every 15 minutes. Add
    two repo secrets (Settings → Secrets and variables → Actions):
    - `CRON_SECRET` — same value as the Vercel env var

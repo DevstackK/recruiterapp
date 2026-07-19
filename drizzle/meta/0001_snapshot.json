@@ -1,0 +1,927 @@
+{
+  "id": "68125987-8cd2-4e81-a74c-31b21c61b7f4",
+  "prevId": "6fa7474b-e482-48aa-baa5-e1c66cba3677",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.api_usage_log": {
+      "name": "api_usage_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "purpose": {
+          "name": "purpose",
+          "type": "api_usage_purpose",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "model": {
+          "name": "model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "input_tokens": {
+          "name": "input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "output_tokens": {
+          "name": "output_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cache_creation_input_tokens": {
+          "name": "cache_creation_input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cache_read_input_tokens": {
+          "name": "cache_read_input_tokens",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "estimated_cost_usd": {
+          "name": "estimated_cost_usd",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.candidates": {
+      "name": "candidates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source": {
+          "name": "source",
+          "type": "candidate_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.cvs": {
+      "name": "cvs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "candidate_id": {
+          "name": "candidate_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_url": {
+          "name": "file_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_type": {
+          "name": "file_type",
+          "type": "cv_file_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_text": {
+          "name": "raw_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "structured_profile": {
+          "name": "structured_profile",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_email_id": {
+          "name": "source_email_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "cv_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "parsed_at": {
+          "name": "parsed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error_detail": {
+          "name": "error_detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cvs_candidate_id_candidates_id_fk": {
+          "name": "cvs_candidate_id_candidates_id_fk",
+          "tableFrom": "cvs",
+          "tableTo": "candidates",
+          "columnsFrom": [
+            "candidate_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "cvs_job_id_jobs_id_fk": {
+          "name": "cvs_job_id_jobs_id_fk",
+          "tableFrom": "cvs",
+          "tableTo": "jobs",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "cvs_source_email_id_inbound_emails_id_fk": {
+          "name": "cvs_source_email_id_inbound_emails_id_fk",
+          "tableFrom": "cvs",
+          "tableTo": "inbound_emails",
+          "columnsFrom": [
+            "source_email_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.gmail_credentials": {
+      "name": "gmail_credentials",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "email_address": {
+          "name": "email_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "encrypted_refresh_token": {
+          "name": "encrypted_refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scopes": {
+          "name": "scopes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "connected_at": {
+          "name": "connected_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "last_refresh_error": {
+          "name": "last_refresh_error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.gmail_sync_state": {
+      "name": "gmail_sync_state",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "last_history_id": {
+          "name": "last_history_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_checked_at": {
+          "name": "last_checked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "watch_expiration": {
+          "name": "watch_expiration",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.inbound_emails": {
+      "name": "inbound_emails",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "gmail_message_id": {
+          "name": "gmail_message_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "from_address": {
+          "name": "from_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "has_attachment": {
+          "name": "has_attachment",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "attachment_count": {
+          "name": "attachment_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "linked_job_id": {
+          "name": "linked_job_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "inbound_email_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'new'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "inbound_emails_linked_job_id_jobs_id_fk": {
+          "name": "inbound_emails_linked_job_id_jobs_id_fk",
+          "tableFrom": "inbound_emails",
+          "tableTo": "jobs",
+          "columnsFrom": [
+            "linked_job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "inbound_emails_gmail_message_id_unique": {
+          "name": "inbound_emails_gmail_message_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "gmail_message_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.jobs": {
+      "name": "jobs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "raw_jd_text": {
+          "name": "raw_jd_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "raw_jd_file_url": {
+          "name": "raw_jd_file_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "structured_requirements": {
+          "name": "structured_requirements",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "job_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "public_upload_slug": {
+          "name": "public_upload_slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "linkedin_post_id": {
+          "name": "linkedin_post_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "linkedin_posted_at": {
+          "name": "linkedin_posted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "jobs_public_upload_slug_unique": {
+          "name": "jobs_public_upload_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "public_upload_slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.matches": {
+      "name": "matches",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "cv_id": {
+          "name": "cv_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rationale": {
+          "name": "rationale",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "name": "status",
+          "type": "match_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending_review'"
+        },
+        "model_used": {
+          "name": "model_used",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prompt_version": {
+          "name": "prompt_version",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reviewed_at": {
+          "name": "reviewed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "matches_cv_job_unique": {
+          "name": "matches_cv_job_unique",
+          "columns": [
+            {
+              "expression": "cv_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "job_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "matches_cv_id_cvs_id_fk": {
+          "name": "matches_cv_id_cvs_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "cvs",
+          "columnsFrom": [
+            "cv_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "matches_job_id_jobs_id_fk": {
+          "name": "matches_job_id_jobs_id_fk",
+          "tableFrom": "matches",
+          "tableTo": "jobs",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.notifications": {
+      "name": "notifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "type": {
+          "name": "type",
+          "type": "notification_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "related_match_id": {
+          "name": "related_match_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "read_at": {
+          "name": "read_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "notifications_related_match_id_matches_id_fk": {
+          "name": "notifications_related_match_id_matches_id_fk",
+          "tableFrom": "notifications",
+          "tableTo": "matches",
+          "columnsFrom": [
+            "related_match_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.outreach_drafts": {
+      "name": "outreach_drafts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "candidate_name": {
+          "name": "candidate_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "candidate_context": {
+          "name": "candidate_context",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "job_id": {
+          "name": "job_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "draft_message": {
+          "name": "draft_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "outreach_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "outreach_drafts_job_id_jobs_id_fk": {
+          "name": "outreach_drafts_job_id_jobs_id_fk",
+          "tableFrom": "outreach_drafts",
+          "tableTo": "jobs",
+          "columnsFrom": [
+            "job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.api_usage_purpose": {
+      "name": "api_usage_purpose",
+      "schema": "public",
+      "values": [
+        "jd_parse",
+        "cv_parse",
+        "match_score",
+        "outreach_draft",
+        "linkedin_post"
+      ]
+    },
+    "public.candidate_source": {
+      "name": "candidate_source",
+      "schema": "public",
+      "values": [
+        "upload_form",
+        "email_reply",
+        "manual"
+      ]
+    },
+    "public.cv_file_type": {
+      "name": "cv_file_type",
+      "schema": "public",
+      "values": [
+        "pdf",
+        "docx"
+      ]
+    },
+    "public.cv_status": {
+      "name": "cv_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "parsed",
+        "error"
+      ]
+    },
+    "public.inbound_email_status": {
+      "name": "inbound_email_status",
+      "schema": "public",
+      "values": [
+        "new",
+        "processed",
+        "ignored",
+        "error"
+      ]
+    },
+    "public.job_status": {
+      "name": "job_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "open",
+        "closed"
+      ]
+    },
+    "public.match_status": {
+      "name": "match_status",
+      "schema": "public",
+      "values": [
+        "pending_review",
+        "approved",
+        "rejected"
+      ]
+    },
+    "public.notification_type": {
+      "name": "notification_type",
+      "schema": "public",
+      "values": [
+        "new_high_match",
+        "parse_error",
+        "gmail_reconnect_needed",
+        "linkedin_post_failed"
+      ]
+    },
+    "public.outreach_status": {
+      "name": "outreach_status",
+      "schema": "public",
+      "values": [
+        "draft",
+        "copied",
+        "sent",
+        "replied",
+        "no_response",
+        "declined"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
