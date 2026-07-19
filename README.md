@@ -27,13 +27,28 @@ ORM, Anthropic Claude API, Gmail API (personal Gmail via OAuth), Vercel hosting,
      (server-only — used for Storage uploads; never expose this to the browser).
    - Auth → create the one recruiter user (email/password).
    - Run `npm run db:push` to create tables from `src/lib/db/schema.ts`.
-3. **Google Cloud Console** (for Gmail, needed starting Phase 5):
+3. **Google Cloud Console** (for Gmail — Phase 5 is now built, this is required to use it):
    - Create a project, enable the Gmail API.
    - OAuth consent screen: External, Testing, add your own Gmail as a test user, scope
-     `gmail.readonly` (add `gmail.send` later if wanted).
-   - Create an OAuth 2.0 Client ID (Web application) with a redirect URI pointing at your deployed
-     app (e.g. `https://<app>.vercel.app/api/gmail/callback`).
-   - Put Client ID/Secret into `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET`.
+     `https://www.googleapis.com/auth/gmail.readonly`.
+   - Create an OAuth 2.0 Client ID (Web application) with an **Authorized redirect URI** that
+     exactly matches `GOOGLE_OAUTH_REDIRECT_URI` below (e.g. `https://<app>.vercel.app/api/gmail/callback`,
+     or `http://localhost:3000/api/gmail/callback` for local testing).
+   - Put Client ID/Secret into `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET`, and the
+     redirect URI into `GOOGLE_OAUTH_REDIRECT_URI`.
+   - Generate `GMAIL_TOKEN_ENCRYPTION_KEY` with `openssl rand -base64 32` — this encrypts the
+     stored refresh token at rest; losing/rotating it invalidates the stored connection (just
+     reconnect via the Settings page).
+   - In the app, go to **Settings → Gmail connection** and click **Connect Gmail**, then approve
+     access as your own Gmail account. Use **Check Gmail now** to pull in CVs manually until
+     Phase 6 automates it on a schedule.
+   - **Routing replies to the right job**: each job's public apply page instructs candidates to
+     email their CV to `you+job-<slug>@gmail.com` (a Gmail "plus address" — mail still lands in
+     your normal inbox). The poller reads the `To:` header to link the CV to that job
+     automatically; if it doesn't match, link it manually from the candidate's page.
+   - Testing-mode OAuth consent screens can require re-consent periodically for sensitive scopes.
+     If Gmail checks start failing, the Settings page will show a "Reconnect needed" banner —
+     just click Connect again.
 4. **Vercel** — connect the repo, set all env vars from `.env.local.example`, deploy.
 5. **GitHub Actions** — add a `CRON_SECRET` repo secret matching the Vercel env var (needed starting
    Phase 6).

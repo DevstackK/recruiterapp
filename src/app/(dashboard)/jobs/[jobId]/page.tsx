@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { candidates, cvs, jobs, matches } from "@/lib/db/schema";
+import { candidates, cvs, gmailCredentials, jobs, matches } from "@/lib/db/schema";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +22,11 @@ export default async function JobDetailPage({
   }
 
   const req = job.structuredRequirements;
+
+  const [credentials] = await db.select().from(gmailCredentials).limit(1);
+  const applyEmail = credentials
+    ? credentials.emailAddress.replace("@", `+job-${job.publicUploadSlug}@`)
+    : null;
 
   const applicants = await db
     .select({
@@ -51,8 +56,13 @@ export default async function JobDetailPage({
         <CardHeader>
           <CardTitle>Public apply link</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-1">
           <code className="text-sm">/apply/{job.publicUploadSlug}</code>
+          {applyEmail && (
+            <p className="text-sm text-muted-foreground">
+              Candidates can also email their CV directly to <code>{applyEmail}</code>
+            </p>
+          )}
         </CardContent>
       </Card>
 
