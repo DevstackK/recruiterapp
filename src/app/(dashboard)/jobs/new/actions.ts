@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { jobs, notifications } from "@/lib/db/schema";
@@ -72,40 +73,43 @@ export async function createJob(formData: FormData) {
     })
     .returning({ id: jobs.id });
 
-  // Auto-post to LinkedIn via Postiz -- best-effort: a failure here must never block job
-  // creation, since the job itself parsed successfully and should still be usable.
-  try {
-    const applyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply/${slug}`;
-    const postText = await draftLinkedInPost({ title, requirements: structuredRequirements, applyUrl });
-
-    // Image generation is its own best-effort step nested inside: if it fails or times out,
-    // the post still goes out as text-only rather than failing the whole auto-post.
-    let image: PostizImageRef | undefined;
-    let imageUrl: string | null = null;
+  // Auto-post to LinkedIn via Postiz -- best-effort and backgrounded via `after()` so it never
+  // makes the user wait on the redirect below: a failure here must never block job creation,
+  // since the job itself parsed successfully and should still be usable.
+  after(async () => {
     try {
-      const imagePrompt = buildJobImagePrompt(title, structuredRequirements);
-      const generated = await generateImage(imagePrompt);
-      const imageResponse = await fetch(generated.imageUrl);
-      if (!imageResponse.ok) throw new Error(`Failed to download generated image: HTTP ${imageResponse.status}`);
-      const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-      image = await uploadImage(imageBuffer, `${slug}.jpg`);
-      imageUrl = generated.imageUrl;
-    } catch {
-      // Non-fatal: proceed without an image.
-    }
+      const applyUrl = `${process.env.NEXT_PUBLIC_APP_URL}/apply/${slug}`;
+      const postText = await draftLinkedInPost({ title, requirements: structuredRequirements, applyUrl });
 
-    const { postId } = await publishLinkedInPost(postText, image);
-    await db
-      .update(jobs)
-      .set({ linkedinPostId: postId, linkedinPostedAt: new Date(), linkedinPostImageUrl: imageUrl })
-      .where(eq(jobs.id, job.id));
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    await db.insert(notifications).values({
-      type: "linkedin_post_failed",
-      message: `Failed to auto-post "${title}" to LinkedIn: ${message}. Job id: ${job.id}`,
-    });
-  }
+      // Image generation is its own best-effort step nested inside: if it fails or times out,
+      // the post still goes out as text-only rather than failing the whole auto-post.
+      let image: PostizImageRef | undefined;
+      let imageUrl: string | null = null;
+      try {
+        const imagePrompt = buildJobImagePrompt(title, structuredRequirements);
+        const generated = await generateImage(imagePrompt);
+        const imageResponse = await fetch(generated.imageUrl);
+        if (!imageResponse.ok) throw new Error(`Failed to download generated image: HTTP ${imageResponse.status}`);
+        const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+        image = await uploadImage(imageBuffer, `${slug}.jpg`);
+        imageUrl = generated.imageUrl;
+      } catch {
+        // Non-fatal: proceed without an image.
+      }
+
+      const { postId } = await publishLinkedInPost(postText, image);
+      await db
+        .update(jobs)
+        .set({ linkedinPostId: postId, linkedinPostedAt: new Date(), linkedinPostImageUrl: imageUrl })
+        .where(eq(jobs.id, job.id));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      await db.insert(notifications).values({
+        type: "linkedin_post_failed",
+        message: `Failed to auto-post "${title}" to LinkedIn: ${message}. Job id: ${job.id}`,
+      });
+    }
+  });
 
   redirect(`/jobs/${job.id}`);
 }

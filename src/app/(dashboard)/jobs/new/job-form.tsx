@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createJob, generateJdDraft } from "./actions";
+import { SubmitWaitOverlay } from "./wait-game";
 
 export function JobForm({ error }: { error?: string }) {
   const [title, setTitle] = useState("");
@@ -68,6 +69,7 @@ export function JobForm({ error }: { error?: string }) {
       <Button type="submit" className="self-start">
         Parse job description
       </Button>
+      <SubmitWaitOverlay />
     </form>
   );
 }
